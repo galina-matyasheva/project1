@@ -1,10 +1,10 @@
 import React from "react";
-import io from "socket.io-client";
+import io from "socket.io-client";//из библиотеки express.js
 
 
 class Chat extends React.Component{
     constructor(props){
-        super(props);
+        super(props);//вызвать конструктор родителя
         this.state = {
             username: '',
             message: '',
@@ -13,23 +13,33 @@ class Chat extends React.Component{
 
         this.socket = io('localhost:8080');
 
-        this.sendMessage = ev => {
+        this.sendMessage = ev => {//послать новое сообщение серверу
+            if(!this.state.username||this.state.username.trim() === ''){
+                return;
+            }
+            if(!this.state.message||this.state.username.trim() === ''){
+                return;
+            }
             ev.preventDefault();
             this.socket.emit('SEND_MESSAGE', {
                 author: this.state.username,
                 message: this.state.message
             });
-            this.setState({message: ''});
+            this.setState({message: ''});//очистить поле сообщений после посылки
+        };
+        this.refreshHistory= ev => {
+            this.socket.emit('SEND_MESSAGE', { // только  получить историю сообщений
+            });
+        }
+
+        const addMessage = data => {//добавить сообщения в историю на клиенте
+            ///console.log("add message data: " + data.author + data.message);
+            this.setState({messages: data});
+            console.log("current history: " + this.state.messages);
         };
 
-        const addMessage = data => {
-            console.log("add message data: " + data.author + data.message);
-            this.setState({messages: [...this.state.messages, data]});
-            console.log(this.state.messages);
-        };
-
-        this.socket.on('RECEIVE_MESSAGE', function(data){
-            addMessage(data);
+        this.socket.on('RECEIVE_HISTORY', function(data){
+            addMessage(data);//получить сообщение от сервера и добавить в историю
         });
     }
 
@@ -43,7 +53,7 @@ class Chat extends React.Component{
                                 <div className="card-title">Глобальный чат</div>
                                 <hr/>
                                 <div className="messages">
-                                    {this.state.messages.map(message => {
+                                    {this.state.messages.map(message => {//отрисовка истории сообщений
                                         return (
                                             <div><span class="colortext">{message.author}</span>: {message.message}</div>
                                         )
@@ -59,6 +69,8 @@ class Chat extends React.Component{
                                        value={this.state.message} onChange={ev => this.setState({message: ev.target.value})}/>
                                 <br/>
                                 <button onClick={this.sendMessage} className="btn btn-primary form-control">Отправить</button>
+                                <button onClick={this.refreshHistory} className="btn btn-primary form-control">Обновить историю</button>
+
                             </div>
                         </div>
                     </div>
