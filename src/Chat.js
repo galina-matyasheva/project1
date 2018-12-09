@@ -17,7 +17,7 @@ class Chat extends React.Component{
             if(!this.state.username||this.state.username.trim() === ''){
                 return;
             }
-            if(!this.state.message||this.state.username.trim() === ''){
+            if(!this.state.message||this.state.message.trim() === ''){
                 return;
             }
             ev.preventDefault();
@@ -27,30 +27,32 @@ class Chat extends React.Component{
             });
             this.setState({message: ''});//очистить поле сообщений после посылки
         };
+
         this.refreshHistory= ev => {
             this.socket.emit('SEND_MESSAGE', { // только  получить историю сообщений
             });
-        }
+        };
 
-        const addMessage = data => {//добавить сообщения в историю на клиенте
-            ///console.log("add message data: " + data.author + data.message);
+        const addMessage = data => {//добавить сообщения в историю на сервер
             this.setState({messages: data});
             console.log("current history: " + this.state.messages);
         };
 
         this.socket.on('RECEIVE_HISTORY', function(data){
-            addMessage(data);//получить сообщение от сервера и добавить в историю
+            addMessage(data);//получить историю сообщений с сервера
         });
     }
 
     render(){
         return (
+
             <div className="container">
                 <div className="row">
-                    <div className="col-4">
+                    <div className="col-4 col-centered">
                         <div className="card">
                             <div className="card-body">
-                                <div className="card-title">Глобальный чат</div>
+                                <div className="card-title">
+                                    Добро пожаловать в глобальный чат!</div>
                                 <hr/>
                                 <div className="messages">
                                     {this.state.messages.map(message => {//отрисовка истории сообщений
@@ -69,6 +71,8 @@ class Chat extends React.Component{
                                        value={this.state.message} onChange={ev => this.setState({message: ev.target.value})}/>
                                 <br/>
                                 <button onClick={this.sendMessage} className="btn btn-primary form-control">Отправить</button>
+                                <div class = "button-refresh-history">
+                                    </div>
                                 <button onClick={this.refreshHistory} className="btn btn-primary form-control">Обновить историю</button>
 
                             </div>
